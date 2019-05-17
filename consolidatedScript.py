@@ -9,13 +9,14 @@ import scipy.io as io
 
 
 
-result_folder = None  # give gloabal access to the  generic result folder used in stubs of script
 pathway_folder = None
+field_export_folder = None
+extracted_field_folder = None  # folder for field along lead path
 
 EXTRACT_LEAD_PATH = True  # set to true if you want to run the lead path extraction stub of the script
 EXPORT_FIELD = False
-CALC_M = True
-FIELD_ALONG_PATH =True
+CALC_M = False
+FIELD_ALONG_PATH = True
 
 '''
 SECTION 0 OF SCRIPT
@@ -31,6 +32,7 @@ if the user can generate individual lead paths or if the paths pre-exist, then t
 
 
 '''
+print ("starting lead path extraction from model")
 
 if (EXTRACT_LEAD_PATH):
 	# Build up the segment dictionary
@@ -42,13 +44,13 @@ if (EXTRACT_LEAD_PATH):
 
 	for pathway_folder in pathway_folder_list:
 		 
-		result_folder = pathway_folder;
+		#result_folder = pathway_folder;
 		
 		
 
 		# Build up the output directory
-		if (not os.path.exists(result_folder)):
-			os.mkdir(result_folder);
+		if (not os.path.exists(pathway_folder)):
+			os.mkdir(pathway_folder);
 		group_list = entity_dict[pathway_folder]  # the pathways as a group
 		pathway_list = group_list.Entities;  #all the different pathway in the model as individuals
 		for pathway in pathway_list:  #for each individual pathway
@@ -62,7 +64,7 @@ if (EXTRACT_LEAD_PATH):
 				output_list.append(pathway_curve.Eval(point));
 				point += point_step;
 			output_list.append(pathway_curve.Eval(end));
-			output_file_name = result_folder + '\\' + pathway.Name + '.txt';  #file name is extracted from the model name
+			output_file_name = pathway_folder + '\\' + pathway.Name + '.txt';  #file name is extracted from the model name
 			output_file = open(output_file_name,'w'); #file to which a file is writter
 			for data in output_list:
 				str_out = str(data[0]/1e3) + '\t' + str(data[1]/1e3) + '\t' + str(data[2]/1e3) + '\n';
@@ -71,11 +73,16 @@ if (EXTRACT_LEAD_PATH):
 			
 			
 		
-	pathway_folder = result_folder  # this is done so that pathway folder can be accessible in later part of this script, if there multiple pathways, the last one will be used
+	pathway_folder = pathway_folder  # this is done so that pathway folder can be accessible in later part of this script, if there multiple pathways, the last one will be used
 
-	
+	print pathway_folder
+print ("end of lead path extraction from model")
+
+
 if (EXPORT_FIELD):
 	
+	
+	print ("starting field export..." )
 	'''
 
 	SECTION 1 OF SCRIPT
@@ -98,21 +105,21 @@ if (EXPORT_FIELD):
 	import scipy.io
 	import XCoreModeling as XCore
 
-	folder = 'full EM fields\\'   # top directory where the  EM fields will be saved  PROMPT USER FOR THIS
+	field_export_folder = 'full EM fields\\'   # top directory where the  EM fields will be saved  PROMPT USER FOR THIS
 
-	if (not os.path.exists(folder)):
-		os.mkdir(folder); 
+	if (not os.path.exists(field_export_folder)):
+		os.mkdir(field_export_folder); 
 		
 		
-	B1_file_folder = folder+'B1 file\\'      #folder for the B1 field
+	B1_file_folder = field_export_folder+'B1 file\\'      #folder for the B1 field
 	if (not os.path.exists(B1_file_folder)):
 		os.mkdir(B1_file_folder); 
 	sim_list = list(s4l_v1.document.AllSimulations);  #simulation list
 	project_name = sim_list[0].GetOutputFileName()
 	project_name = project_name[0:project_name.find('.smash')].split('/')[-1]
-	result_file = folder + 'B1 file\\'+project_name +'.txt'
+	result_file = field_export_folder + 'B1 file\\'+project_name +'.txt'
 	result_file_id = open(result_file,'w')
-	result_folder = folder + project_name[0:-4]+'\\'
+	result_folder = field_export_folder + project_name[0:-4]+'\\'
 
 
 	if (not os.path.exists(result_folder)):
@@ -198,8 +205,10 @@ if (EXPORT_FIELD):
 		scipy.io.savemat(result_folder+sim.Name,out_value,True)  # write model fields to file
 	result_file_id.close()
 
-
+	field_export_folder = result_folder  # so that other part of the stub can use this
 	
+	
+	print ("End of field export ")
 if (CALC_M):
 	#scipt stub number 3 in the voltage temperature script series
 	#script calculates the M-matrix
@@ -218,25 +227,26 @@ if (CALC_M):
 	
 
 
-	folder = result_folder;    # name of directory that contains sin and cosin efields for different simulations
+	 # field_export_folder is name of directory that contains sin and cosin efields for different simulations
 	
-	if folder is None:  # this is necessary in case we run this stub before running other stubs, we dont want none folder
-		folder = 'E:\\c_test\\Sasis Project\\full EM fields\\3T bodycoil\\Fat\\'
-		print (" HARD CODING ALERT:::the directory in which to look for the E field has been set to 'E:\\c_test\\Sasis Project\\full EM fields\\3T bodycoil\\Fat\\'")
+	if field_export_folder is None:  # this is necessary in case we run this stub before running other stubs, we dont want none folder
+		field_export_folder = 'E:\\c_test\\Sasis Project\\Python MRI TF Scripts\\full EM fields\\3T bodycoil\\Fat'
+		print (" HARD CODING ALERT:::the directory in which to look for the E field has been set to 'E:\\c_test\\Sasis Project\\Python MRI TF Scripts\\full EM fields\\3T bodycoil\\Fat'")
 
 	#sub_folder1 = folder+'\\cos\\';  # name of directory containing  the human body fields that was obtained by cosine excitation of the MRI coil
 	#sub_folder2 = folder+'\\sin\\';  # name of directory containing  the human body fields that was obtained by sine excitation of the MRI coil
 
 
-	M_folder = folder+'\\M\\';  # the folder in which the M-Matrix will be stored
+	M_folder = field_export_folder+'\\M\\';  # the folder in which the M-Matrix will be stored
 
 	if not (os.path.isdir(M_folder)): # if M folder directory does not exist, then create it 	
 		 os.makedirs(M_folder)
+		 print "made M folder"
 
 
 
-	all_files_cos = [ f for f in os.listdir(folder) if 'Cos' in str(f) ] #create a list of all files in with cosine exciation in the directory
-	all_files_sin = [ f for f in os.listdir(folder) if 'Sin' in str(f) ] #create a list of all files in with cosine exciation in the directory
+	all_files_cos = [ f for f in os.listdir(field_export_folder) if 'Cos' in str(f) ] #create a list of all files in with cosine exciation in the directory
+	all_files_sin = [ f for f in os.listdir(field_export_folder) if 'Sin' in str(f) ] #create a list of all files in with cosine exciation in the directory
 	
 	all_files = all_files_cos[:] # this will be used to decouple cos and sin labels in the final M file
 	
@@ -249,7 +259,7 @@ if (CALC_M):
 	N = len(all_files_cos);  # there should be an equal number of sine and cos  files
 
 	for i in range(N):
-		cosE_mat = sio.loadmat(os.path.join(folder,all_files_cos[i]))   #load the .mat file containing the cosine EM fields of the body model
+		cosE_mat = sio.loadmat(os.path.join(field_export_folder,all_files_cos[i]))   #load the .mat file containing the cosine EM fields of the body model
 		#cosE_mat['a']
 		
 		'''
@@ -318,7 +328,7 @@ if (CALC_M):
 		
 		
 		
-		sinE_mat = sio.loadmat(os.path.join(folder,all_files_sin[i]))   #load the .mat file containing the sin E fields of the body model
+		sinE_mat = sio.loadmat(os.path.join(field_export_folder,all_files_sin[i]))   #load the .mat file containing the sin E fields of the body model
 		E = sinE_mat['E']
 		Ex_sin = np.reshape(E[:,0],(Xn-1,Yn-1,Zn-1),order = "F");
 		Ey_sin = np.reshape(E[:,1],(Xn-1,Yn-1,Zn-1),order = "F");
@@ -339,8 +349,10 @@ if (CALC_M):
 
 			
 
-			
+	print ("End of M Calculation")		
 if (FIELD_ALONG_PATH):
+
+	print ("starting extraction of field along lead paths")
 
 	'''
 	#PYTHON SCRIPT STUB 4, SCRIPT NEEDED FOR VOLTAGE TEMPERATURE CALCULATION OF THE IPG LEAD
@@ -370,18 +382,18 @@ if (FIELD_ALONG_PATH):
 		raise Exception ("Pathway folder is None, allow code for generating pathway folder to run")
 	
 
-	result_folder = '\\Etan5\\';  # top level directory of where the fields will be saved  PROMT USER FOR THIS
+	extracted_field_folder = 'Etan6\\';  # top level directory of where the fields will be saved  PROMT USER FOR THIS
 
-	if (not os.path.exists(result_folder)):
-		os.mkdir(result_folder);                       # make top directory folder if it does not exist
+	if (not os.path.exists(extracted_field_folder)):
+		os.mkdir(extracted_field_folder);                       # make top directory folder if it does not exist
 		
-	result_folder = result_folder+result_subfolder;		# actual folder where field files will be stored
+	extracted_field_folder = extracted_field_folder+result_subfolder;		# actual folder where field files will be stored
 	file_list = os.listdir(pathway_folder);           
 		
-	if (not os.path.exists(result_folder)):
-		os.mkdir(result_folder);
+	if (not os.path.exists(extracted_field_folder)):
+		os.mkdir(extracted_field_folder);
 
-
+	
 	sim_index = -1
 	for sim in sim_list:      #for each simulation in simulation list
 		sim_index = sim_index+1
@@ -407,7 +419,7 @@ if (FIELD_ALONG_PATH):
 				path_coo_file = open(InputFileName,'r');
 				coo_list_str = path_coo_file.readlines();
 				path_coo_file.close();
-				result_file_name = result_folder + '/' + sim_name + '_' + coo_file;
+				result_file_name = extracted_field_folder + '/' + sim_name + '_' + coo_file;
 				field_result_file = open(result_file_name,'w');
 				str_out = str('%coord_x\tcoord_y\tcoord_z\tEtan_real\tEtan_imag\n');
 				field_result_file.write(str_out);
@@ -454,3 +466,6 @@ if (FIELD_ALONG_PATH):
 					+str(Mid_Point[index2][2])+'\t'+ str(ETanTmp.real) + '\t' + str(ETanTmp.imag)+'\n';  #each output line is mid point and the real/imaginary path of E-field
 					field_result_file.write(str_out);
 				field_result_file.close();
+				
+				
+	print("End of field extraction")
