@@ -13,7 +13,7 @@ pathway_folder = None
 field_export_folder = None
 Etan_folder = None  # folder for field along lead path
 
-EXTRACT_LEAD_PATH = True  # set to true if you want to run the lead path extraction stub of the script
+EXTRACT_LEAD_PATH = True  # set to true if you want to run the lead path extraction stub of the script ALWAYS SET TO TRUE
 EXPORT_FIELD = True
 CALC_M = True
 FIELD_ALONG_PATH = True
@@ -548,14 +548,14 @@ if (CALC_HEAT_VOLTAGE):
 		Etan_folder = 'E:\\c_test\\Sasis Project\\Python MRI TF Scripts\\Etan6\\3T bodycoil Fat'
 		print ("etan folder not prexisting in this script scope. It will be set to "+Etan_folder)
 	
-	tf_file = '1.5T_heating_ring_106_304.csv'  # prompt user for this
+	tf_file = 't3_104_300_formatted.csv'  # prompt user for this
 	print ("the transfer function file that will be used is this "+tf_file)
 	#tf_file = 'E:\\human model\\TF\\1.5T_heating_ring_106_304.csv'   # the matalab version uses xls but this version uses CSV. User needs to convert to transfer function file to CSV before use
 	norm_folder = 'full EM fields'
 	print ("ALERT:: norm folder hardcoded as "+norm_folder)
 	result_type = 'heating'
 	norm_type = 'B1_wbSAR'
-	heat_voltage_result_file = 'example6.csv'
+	heat_voltage_result_file = 'secondRun3T_104_300.csv'
 	print ("result file is hardcoded as: "+result_file)
 	
 	
@@ -643,7 +643,7 @@ if (CALC_HEAT_VOLTAGE):
 				sinB.write(B1_line)
 		cosB.close()
 		sinB.close()
-				
+		f_B1.close()		
 		
 		
 		
@@ -817,12 +817,12 @@ if (CALC_HEAT_VOLTAGE):
 		
 		if os.path.exists(Etan_folder_cos):
 			shutil.rmtree(Etan_folder_cos)
-			os.makedirs(Etan_folder_cos)
+		os.makedirs(Etan_folder_cos) 
 			
 			
 		if os.path.exists(Etan_folder_sin):
 			shutil.rmtree(Etan_folder_sin)
-			os.makedirs(Etan_folder_sin)
+		os.makedirs(Etan_folder_sin)  
 
 		
 		
