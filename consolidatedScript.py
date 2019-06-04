@@ -13,10 +13,10 @@ pathway_folder = None
 field_export_folder = None
 Etan_folder = None  # folder for field along lead path
 
-EXTRACT_LEAD_PATH = True  # set to true if you want to run the lead path extraction stub of the script ALWAYS SET TO TRUE
-EXPORT_FIELD = True
-CALC_M = True
-FIELD_ALONG_PATH = True
+#EXTRACT_LEAD_PATH = True  # set to true if you want to run the lead path extraction stub of the script ALWAYS SET TO TRUE
+EXPORT_FIELD = False
+CALC_M = False
+FIELD_ALONG_PATH = False
 CALC_HEAT_VOLTAGE = True
 
 
@@ -38,7 +38,7 @@ if the user can generate individual lead paths or if the paths pre-exist, then t
 '''
 print ("starting lead path extraction from model")
 
-if (EXTRACT_LEAD_PATH):
+if (True):  # always extract lead path
 	# Build up the segment dictionary
 	entity_dict = model.AllEntities();  #all the entities in the active model
 
@@ -548,15 +548,15 @@ if (CALC_HEAT_VOLTAGE):
 		Etan_folder = 'E:\\c_test\\Sasis Project\\Python MRI TF Scripts\\Etan6\\3T bodycoil Fat'
 		print ("etan folder not prexisting in this script scope. It will be set to "+Etan_folder)
 	
-	tf_file = 't3_104_300_formatted.csv'  # prompt user for this
+	tf_file = '300_104_3T_Scaled_Interp.csv'  # prompt user for this
 	print ("the transfer function file that will be used is this "+tf_file)
 	#tf_file = 'E:\\human model\\TF\\1.5T_heating_ring_106_304.csv'   # the matalab version uses xls but this version uses CSV. User needs to convert to transfer function file to CSV before use
 	norm_folder = 'full EM fields'
 	print ("ALERT:: norm folder hardcoded as "+norm_folder)
 	result_type = 'heating'
 	norm_type = 'B1_wbSAR'
-	heat_voltage_result_file = 'secondRun3T_104_300.csv'
-	print ("result file is hardcoded as: "+result_file)
+	heat_voltage_result_file = 'test6.csv'
+	print ("result file is hardcoded as: "+heat_voltage_result_file)
 	
 	
 
@@ -936,12 +936,10 @@ if (CALC_HEAT_VOLTAGE):
 			tf_name = tf_file[tf_index+1:-4]
 			tf_info = tf_name.split('_')
 			B1_res = B1_map[E_sim_type]
-			full_result[q] =[sim_type,result_tab,result_type,norm_type,
-                temp,tf_info,coil_map[sim_type],polarization,
-                B1_res]
+			full_result[q] =[sim_type+','+','.join(' '.join(result_tab)[:-4].split())+','+result_type+','+norm_type+','+str(temp)+','+','.join(tf_info)+','+str(coil_map[sim_type])+','+polarization+','+str(B1_res)]
 			file_o = open(heat_voltage_result_file, "ab")
-			csv_o = csv.writer(file_o, delimiter=',')
-			csv_o.writerow(full_result[q])
+			#csv_o = csv.writer(file_o, delimiter=',')
+			file_o.write(''.join(full_result[q])+'\n')
 		file_o.close()	
 	
 	print("end of heat voltage calculation")

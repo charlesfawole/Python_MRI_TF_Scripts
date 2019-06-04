@@ -1,6 +1,6 @@
 p_TF = 'T';
 mea = []; % measured temperature or voltage
-Edata = 'E:\human model\TF\Etan\3T-coil-II-ZigZag\quadrature_SEMX14_S2.txt';
+Edata = 'quadrature_SEMX14_S2.txt';
 Efield = load(Edata);
 Etan.y = Efield(:,4)+1j*Efield(:,5);
 Etan.y = -1*Etan.y(end:-1:1);
